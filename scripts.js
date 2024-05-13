@@ -3,16 +3,22 @@ import { books, authors, genres, BOOKS_PER_PAGE } from './data.js'
 let page = 1;
 let matches = books
 
+//Create a DocumentFragment to hold our new elements before inserting them all at once
 const starting = document.createDocumentFragment()
 
+// Loop through a specific number of items from the 'matches' array
 for (const { author, id, image, title } of matches.slice(0, BOOKS_PER_PAGE)) {
+    // Create a new button element
     const element = document.createElement('button')
+    // Add a class name 'preview' to the button
     element.classList = 'preview'
+    // Set a data attribute 'data-preview' on the button with the value of 'id'
     element.setAttribute('data-preview', id)
 
+    // Set the inner HTML of the button element (the content that will be displayed)
     element.innerHTML = `
         <img
-            class="preview__image"
+            class="preview__image"  
             src="${image}"
         />
         
@@ -21,7 +27,7 @@ for (const { author, id, image, title } of matches.slice(0, BOOKS_PER_PAGE)) {
             <div class="preview__author">${authors[author]}</div>
         </div>
     `
-
+    // Append the newly created button element to an element with ID 'starting' (assuming this element exists in your HTML)
     starting.appendChild(element)
 }
 
