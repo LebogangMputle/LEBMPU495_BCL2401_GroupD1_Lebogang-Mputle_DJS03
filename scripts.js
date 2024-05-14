@@ -240,3 +240,12 @@ document.querySelector('[data-list-items]').addEventListener('click', (event) =>
         document.querySelector('[data-list-description]').innerText = active.description
     }
 })
+
+//function to handle data from the data.js file.
+function getFilteredBooks(filters) {
+    // Implement logic to filter books based on genre, author, and title from 'books' data
+    const results = [];
+    // ... filtering logic
+    return results;
+  }
+  
