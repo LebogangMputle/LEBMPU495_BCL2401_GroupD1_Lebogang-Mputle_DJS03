@@ -35,14 +35,26 @@ function createBookPreviews(matches, booksPerPage, targetElement) {
     return element;
   }
   
+// Function to create genre option element
+function createGenreOption(value, text) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.innerText = text;
+    return option;
+  }
+
   // Usage example:
   const targetElement = document.querySelector('[data-list-items]');
   createBookPreviews(matches, BOOKS_PER_PAGE, targetElement);
 
+  const genreHtml = document.createDocumentFragment();
+  const firstGenreElement = createGenreOption('any', 'All Genres');
+  genreHtml.appendChild(firstGenreElement);
+
 //document.querySelector('[data-list-items]').appendChild(starting)
 
-const genreHtml = document.createDocumentFragment()
-const firstGenreElement = document.createElement('option')
+//const genreHtml = document.createDocumentFragment()
+//const firstGenreElement = document.createElement('option')
 firstGenreElement.value = 'any'
 firstGenreElement.innerText = 'All Genres'
 genreHtml.appendChild(firstGenreElement)
