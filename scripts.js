@@ -79,6 +79,7 @@ for (const [id, name] of Object.entries(authors)) {
 document.querySelector('[data-search-authors]').appendChild(authorsHtml);
 
 function setThemeBasedOnPreference() {
+    // Check if the browser supports the 'prefers-color-scheme' media query
     const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   
     const theme = prefersDarkMode ? 'night' : 'day';
@@ -87,6 +88,7 @@ function setThemeBasedOnPreference() {
     const colorDark = prefersDarkMode ? '255, 255, 255' : '10, 10, 20';
     const colorLight = prefersDarkMode ? '10, 10, 20' : '255, 255, 255';
   
+    // Set the CSS custom properties for dark and light theme colors
     document.documentElement.style.setProperty('--color-dark', colorDark);
     document.documentElement.style.setProperty('--color-light', colorLight);
   }
