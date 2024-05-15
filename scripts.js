@@ -1,79 +1,99 @@
-import { books, authors, genres, BOOKS_PER_PAGE } from './data.js';
+import { books, authors, genres, BOOKS_PER_PAGE } from './data.js'
 
-// State variables
+//state variables
 let page = 1;
-let matches = books;
+let matches = books
 
-// Function to create element with specified tag and attributes
-function createElement(tag, attributes = {}) {
-  const element = document.createElement(tag);
-  Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
-  return element;
-}
-
-// Function to create option element
-function createOption(value, text) {
-  return createElement('option', { value, innerText: text });
-}
-
-// Function to populate element with child elements
-function populateElement(element, children) {
-  children.forEach(child => element.appendChild(child));
-}
+// const starting = document.createDocumentFragment()
 
 // Function to create book preview element
-function createBookPreviewElement(id, image, title, author) {
-  const element = createElement('button', { classList: 'preview', 'data-preview': id });
-  element.innerHTML = `
-    <img class="preview__image" src="${image}" />
-    
-    <div class="preview__info">
-      <h3 class="preview__title">${title}</h3>
-      <div class="preview__author">${author}</div>
-    </div>
-  `;
-
-  return element;
-}
+function createBookPreviews(matches, booksPerPage, targetElement) {
+    const starting = document.createDocumentFragment();
+  
+    for (const { author, id, image, title } of matches.slice(0, booksPerPage)) {
+      const element = createBookPreviewElement(id, image, title, authors[author]);
+      starting.appendChild(element);
+    }
+  
+    targetElement.appendChild(starting);
+  }
+  
+  function createBookPreviewElement(id, image, title, author) {
+    const element = document.createElement('button');
+    element.classList.add('preview');
+    element.setAttribute('data-preview', id);
+  
+    element.innerHTML = `
+      <img class="preview__image" src="${image}" />
+      
+      <div class="preview__info">
+        <h3 class="preview__title">${title}</h3>
+        <div class="preview__author">${author}</div>
+      </div>
+    `;
+  
+    return element;
+  }
+  
+// Function to create genre option element
+function createGenreOption(value, text) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.innerText = text;
+    return option;
+  }
 
 // Usage example:
 const targetElement = document.querySelector('[data-list-items]');
 createBookPreviews(matches, BOOKS_PER_PAGE, targetElement);
 
 const genreHtml = document.createDocumentFragment();
-const firstGenreElement = createOption('any', 'All Genres');
+const firstGenreElement = document.createElement('option');
+firstGenreElement.value = 'any';
+firstGenreElement.innerText = 'All Genres';
 genreHtml.appendChild(firstGenreElement);
 
 for (const [id, name] of Object.entries(genres)) {
-  const element = createOption(id, name);
+  const element = document.createElement('option');
+  element.value = id;
+  element.innerText = name;
   genreHtml.appendChild(element);
 }
 
-populateElement(document.querySelector('[data-search-genres]'), [genreHtml]);
+document.querySelector('[data-search-genres]').appendChild(genreHtml);
 
 // Similar approach for author options
 const authorsHtml = document.createDocumentFragment();
-const firstAuthorElement = createOption('any', 'All Authors');
+const firstAuthorElement = document.createElement('option');
+firstAuthorElement.value = 'any';
+firstAuthorElement.innerText = 'All Authors';
 authorsHtml.appendChild(firstAuthorElement);
 
 for (const [id, name] of Object.entries(authors)) {
-  const element = createOption(id, name);
+  const element = document.createElement('option');
+  element.value = id;
+  element.innerText = name;
   authorsHtml.appendChild(element);
 }
 
-//  call a function named populateElement
-populateElement(document.querySelector('[data-search-authors]'), [authorsHtml]);
+document.querySelector('[data-search-authors]').appendChild(authorsHtml);
 
-
-if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.querySelector('[data-settings-theme]').value = 'night'
-    document.documentElement.style.setProperty('--color-dark', '255, 255, 255');
-    document.documentElement.style.setProperty('--color-light', '10, 10, 20');
-} else {
-    document.querySelector('[data-settings-theme]').value = 'day'
-    document.documentElement.style.setProperty('--color-dark', '10, 10, 20');
-    document.documentElement.style.setProperty('--color-light', '255, 255, 255');
-}
+function setThemeBasedOnPreference() {
+    const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  
+    const theme = prefersDarkMode ? 'night' : 'day';
+    document.querySelector('[data-settings-theme]').value = theme;
+  
+    const colorDark = prefersDarkMode ? '255, 255, 255' : '10, 10, 20';
+    const colorLight = prefersDarkMode ? '10, 10, 20' : '255, 255, 255';
+  
+    document.documentElement.style.setProperty('--color-dark', colorDark);
+    document.documentElement.style.setProperty('--color-light', colorLight);
+  }
+  
+  // Call the function to set the theme initially
+  setThemeBasedOnPreference();
+  
 
 document.querySelector('[data-list-button]').innerText = `Show more (${books.length - BOOKS_PER_PAGE})`
 document.querySelector('[data-list-button]').disabled = (matches.length - (page * BOOKS_PER_PAGE)) > 0
