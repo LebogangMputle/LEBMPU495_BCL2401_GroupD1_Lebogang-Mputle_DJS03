@@ -61,6 +61,7 @@ for (const [id, name] of Object.entries(authors)) {
   authorsHtml.appendChild(element);
 }
 
+//  call a function named populateElement
 populateElement(document.querySelector('[data-search-authors]'), [authorsHtml]);
 
 
