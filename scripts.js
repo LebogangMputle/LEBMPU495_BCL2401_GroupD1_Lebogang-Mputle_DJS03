@@ -1,41 +1,45 @@
 import { books, authors, genres, BOOKS_PER_PAGE } from './data.js'
 
-const BOOKS_PER_PAGE = 10; // Adjust as needed
+//state variables
+let page = 1;
+let matches = books
 
-let books = []; // Replace with your actual book data
-let authors = []; // Replace with your author data (optional) 
-let page = 1; // Tracks current page for pagination (optional)
-let matches = books// Stores search results
+// const starting = document.createDocumentFragment()
 
-//Create a DocumentFragment to hold our new elements before inserting them all at once
-const starting = document.createDocumentFragment()
-
-// Loop through a specific number of items from the 'matches' array
-for (const { author, id, image, title } of matches.slice(0, BOOKS_PER_PAGE)) {
-    // Create a new button element
-    const element = document.createElement('button')
-    // Add a class name 'preview' to the button
-    element.classList = 'preview'
-    // Set a data attribute 'data-preview' on the button with the value of 'id'
-    element.setAttribute('data-preview', id)
-
-    // Set the inner HTML of the button element (the content that will be displayed)
+// Function to create book preview element
+function createBookPreviews(matches, booksPerPage, targetElement) {
+    const starting = document.createDocumentFragment();
+  
+    for (const { author, id, image, title } of matches.slice(0, booksPerPage)) {
+      const element = createBookPreviewElement(id, image, title, authors[author]);
+      starting.appendChild(element);
+    }
+  
+    targetElement.appendChild(starting);
+  }
+  
+  function createBookPreviewElement(id, image, title, author) {
+    const element = document.createElement('button');
+    element.classList.add('preview');
+    element.setAttribute('data-preview', id);
+  
     element.innerHTML = `
-        <img
-            class="preview__image"  
-            src="${image}"
-        />
-        
-        <div class="preview__info">
-            <h3 class="preview__title">${title}</h3>
-            <div class="preview__author">${authors[author]}</div>
-        </div>
-    `
-    // Append the newly created button element to an element with ID 'starting' (assuming this element exists in your HTML)
-    starting.appendChild(element)
-}
+      <img class="preview__image" src="${image}" />
+      
+      <div class="preview__info">
+        <h3 class="preview__title">${title}</h3>
+        <div class="preview__author">${author}</div>
+      </div>
+    `;
+  
+    return element;
+  }
+  
+  // Usage example:
+  const targetElement = document.querySelector('[data-list-items]');
+  createBookPreviews(matches, BOOKS_PER_PAGE, targetElement);
 
-document.querySelector('[data-list-items]').appendChild(starting)
+//document.querySelector('[data-list-items]').appendChild(starting)
 
 const genreHtml = document.createDocumentFragment()
 const firstGenreElement = document.createElement('option')
