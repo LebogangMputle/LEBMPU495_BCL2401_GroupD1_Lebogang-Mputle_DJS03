@@ -1,7 +1,11 @@
 import { books, authors, genres, BOOKS_PER_PAGE } from './data.js'
 
-let page = 1;
-let matches = books
+const BOOKS_PER_PAGE = 10; // Adjust as needed
+
+let books = []; // Replace with your actual book data
+let authors = []; // Replace with your author data (optional) 
+let page = 1; // Tracks current page for pagination (optional)
+let matches = books// Stores search results
 
 //Create a DocumentFragment to hold our new elements before inserting them all at once
 const starting = document.createDocumentFragment()
@@ -240,12 +244,3 @@ document.querySelector('[data-list-items]').addEventListener('click', (event) =>
         document.querySelector('[data-list-description]').innerText = active.description
     }
 })
-
-//function to handle data from the data.js file.
-function getFilteredBooks(filters) {
-    // Implement logic to filter books based on genre, author, and title from 'books' data
-    const results = [];
-    // ... filtering logic
-    return results;
-  }
-  
