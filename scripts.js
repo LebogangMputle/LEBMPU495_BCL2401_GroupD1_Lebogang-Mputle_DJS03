@@ -1,92 +1,68 @@
-import { books, authors, genres, BOOKS_PER_PAGE } from './data.js'
+import { books, authors, genres, BOOKS_PER_PAGE } from './data.js';
 
-//state variables
+// State variables
 let page = 1;
-let matches = books
+let matches = books;
 
-// const starting = document.createDocumentFragment()
+// Function to create element with specified tag and attributes
+function createElement(tag, attributes = {}) {
+  const element = document.createElement(tag);
+  Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+  return element;
+}
+
+// Function to create option element
+function createOption(value, text) {
+  return createElement('option', { value, innerText: text });
+}
+
+// Function to populate element with child elements
+function populateElement(element, children) {
+  children.forEach(child => element.appendChild(child));
+}
 
 // Function to create book preview element
-function createBookPreviews(matches, booksPerPage, targetElement) {
-    const starting = document.createDocumentFragment();
-  
-    for (const { author, id, image, title } of matches.slice(0, booksPerPage)) {
-      const element = createBookPreviewElement(id, image, title, authors[author]);
-      starting.appendChild(element);
-    }
-  
-    targetElement.appendChild(starting);
-  }
-  
-  function createBookPreviewElement(id, image, title, author) {
-    const element = document.createElement('button');
-    element.classList.add('preview');
-    element.setAttribute('data-preview', id);
-  
-    element.innerHTML = `
-      <img class="preview__image" src="${image}" />
-      
-      <div class="preview__info">
-        <h3 class="preview__title">${title}</h3>
-        <div class="preview__author">${author}</div>
-      </div>
-    `;
-  
-    return element;
-  }
-  
-// Function to create genre option element
-function createGenreOption(value, text) {
-    const option = document.createElement('option');
-    option.value = value;
-    option.innerText = text;
-    return option;
-  }
+function createBookPreviewElement(id, image, title, author) {
+  const element = createElement('button', { classList: 'preview', 'data-preview': id });
+  element.innerHTML = `
+    <img class="preview__image" src="${image}" />
+    
+    <div class="preview__info">
+      <h3 class="preview__title">${title}</h3>
+      <div class="preview__author">${author}</div>
+    </div>
+  `;
 
-  // Usage example:
-  const targetElement = document.querySelector('[data-list-items]');
-  createBookPreviews(matches, BOOKS_PER_PAGE, targetElement);
-
-  const genreHtml = document.createDocumentFragment();
-  const firstGenreElement = createGenreOption('any', 'All Genres');
-  genreHtml.appendChild(firstGenreElement);
-
-//document.querySelector('[data-list-items]').appendChild(starting)
-
-//const genreHtml = document.createDocumentFragment()
-//const firstGenreElement = document.createElement('option')
-firstGenreElement.value = 'any'
-firstGenreElement.innerText = 'All Genres'
-genreHtml.appendChild(firstGenreElement)
-
-for (const [id, name] of Object.entries(genres)) {
-    const element = createGenreOption(id, name);
-    genreHtml.appendChild(element);
-  }
-
-for (const [id, name] of Object.entries(genres)) {
-    const element = document.createElement('option')
-    element.value = id
-    element.innerText = name
-    genreHtml.appendChild(element)
+  return element;
 }
 
-document.querySelector('[data-search-genres]').appendChild(genreHtml)
+// Usage example:
+const targetElement = document.querySelector('[data-list-items]');
+createBookPreviews(matches, BOOKS_PER_PAGE, targetElement);
 
-const authorsHtml = document.createDocumentFragment()
-const firstAuthorElement = document.createElement('option')
-firstAuthorElement.value = 'any'
-firstAuthorElement.innerText = 'All Authors'
-authorsHtml.appendChild(firstAuthorElement)
+const genreHtml = document.createDocumentFragment();
+const firstGenreElement = createOption('any', 'All Genres');
+genreHtml.appendChild(firstGenreElement);
+
+for (const [id, name] of Object.entries(genres)) {
+  const element = createOption(id, name);
+  genreHtml.appendChild(element);
+}
+
+populateElement(document.querySelector('[data-search-genres]'), [genreHtml]);
+
+// Similar approach for author options
+const authorsHtml = document.createDocumentFragment();
+const firstAuthorElement = createOption('any', 'All Authors');
+authorsHtml.appendChild(firstAuthorElement);
 
 for (const [id, name] of Object.entries(authors)) {
-    const element = document.createElement('option')
-    element.value = id
-    element.innerText = name
-    authorsHtml.appendChild(element)
+  const element = createOption(id, name);
+  authorsHtml.appendChild(element);
 }
 
-document.querySelector('[data-search-authors]').appendChild(authorsHtml)
+populateElement(document.querySelector('[data-search-authors]'), [authorsHtml]);
+
 
 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.querySelector('[data-settings-theme]').value = 'night'
