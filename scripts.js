@@ -110,13 +110,16 @@ const closeOverlay = (selector) => {
     closeOverlay("[data-list-active]")
   );
 
+  //theme setting submission handler
   getElement("[data-settings-form]").addEventListener("submit", (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const { theme } = Object.fromEntries(formData);
     applyTheme(theme);
+    localStorage.setItem("theme", theme);
     closeOverlay("[data-settings-overlay]");
   });
+  
   
   getElement("[data-search-form]").addEventListener("submit", (event) => {
     event.preventDefault();
@@ -182,7 +185,7 @@ createBookPreviews(
     getElement("[data-list-items]")
 );
 updateShowMoreButton();
-//Storing the theme in the local storage
+//Stored the theme in the local storage
 const initialTheme = getStoredTheme();
 applyTheme(initialTheme);
 localStorage.setItem("theme", initialTheme);
