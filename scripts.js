@@ -6,42 +6,44 @@ let matches = books
 
 // const starting = document.createDocumentFragment()
 
+// Function to get DOM elements
+const getElement = (selector) => document.querySelector(selector);
+
 // Function to create book preview element
-function createBookPreviews(matches, booksPerPage, targetElement) {
-    const starting = document.createDocumentFragment();
+// Function to create and append book previews
+const createBookPreviews = (books, container) => {
+    const fragment = document.createDocumentFragment();
+    books.forEach(({ author, id, image, title }) => {
+      const element = document.createElement("button");
+      element.classList = "preview";
+      element.setAttribute("data-preview", id);
+      element.innerHTML = `
+        <img class="preview__image" src="${image}" />
+        <div class="preview__info">
+          <h3 class="preview__title">${title}</h3>
+          <div class="preview__author">${authors[author]}</div>
+        </div>
+      `;
+      fragment.appendChild(element);
+    });
+    container.appendChild(fragment);
+  };
   
-    for (const { author, id, image, title } of matches.slice(0, booksPerPage)) {
-      const element = createBookPreviewElement(id, image, title, authors[author]);
-      starting.appendChild(element);
-    }
-  
-    targetElement.appendChild(starting);
-  }
-  
-  function createBookPreviewElement(id, image, title, author) {
-    const element = document.createElement('button');
-    element.classList.add('preview');
-    element.setAttribute('data-preview', id);
-  
-    element.innerHTML = `
-      <img class="preview__image" src="${image}" />
-      
-      <div class="preview__info">
-        <h3 class="preview__title">${title}</h3>
-        <div class="preview__author">${author}</div>
-      </div>
-    `;
-  
-    return element;
-  }
-  
-// Function to create genre option element
-function createGenreOption(value, text) {
-    const option = document.createElement('option');
-    option.value = value;
-    option.innerText = text;
-    return option;
-  }
+// Function to create and append options to a select element
+const createOptions = (options, defaultOption, container) => {
+    const fragment = document.createDocumentFragment();
+    const firstOption = document.createElement("option");
+    firstOption.value = "any";
+    firstOption.innerText = defaultOption;
+    fragment.appendChild(firstOption);
+    Object.entries(options).forEach(([id, name]) => {
+      const element = document.createElement("option");
+      element.value = id;
+      element.innerText = name;
+      fragment.appendChild(element);
+    });
+    container.appendChild(fragment);
+  };
 
 // Usage example:
 const targetElement = document.querySelector('[data-list-items]');
@@ -264,3 +266,7 @@ document.querySelector('[data-list-items]').addEventListener('click', (event) =>
         document.querySelector('[data-list-description]').innerText = active.description
     }
 })
+
+// Initial setup
+createOptions(genres, "All Genres", getElement("[data-search-genres]"));
+createOptions(authors, "All Authors", getElement("[data-search-authors]"));
