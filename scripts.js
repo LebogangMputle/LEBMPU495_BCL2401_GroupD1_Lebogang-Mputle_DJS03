@@ -43,16 +43,17 @@ const createOptions = (options, defaultOption, container) => {
 
 // Theme functionality
 const applyTheme = (theme) => {
-  const isNight = theme === "night";
-  document.documentElement.style.setProperty(
-    "--color-dark",
-    isNight ? "255, 255, 255" : "10, 10, 20"
-  );
-  document.documentElement.style.setProperty(
-    "--color-light",
-    isNight ? "10, 10, 20" : "255, 255, 255"
-  );
-};
+    const isNight = theme === "night";
+    document.documentElement.style.setProperty(
+      "--color-dark",
+      isNight ? "255, 255, 255" : "10, 10, 20"
+    );
+    document.documentElement.style.setProperty(
+      "--color-light",
+      isNight ? "10, 10, 20" : "255, 255, 255"
+    );
+  };
+  
 
 // "Show more" button logic
 const updateShowMoreButton = () => {
@@ -86,6 +87,12 @@ const closeOverlay = (selector) => {
       return titleMatch && authorMatch && genreMatch;
     });
   };
+
+  //check for a stored theme preference in local storage
+  const getStoredTheme = () => {
+    return localStorage.getItem("theme") || "day"; // Default to "day" if not found
+  };
+  
   
   getElement("[data-search-cancel]").addEventListener("click", () =>
     closeOverlay("[data-search-overlay]")
@@ -175,3 +182,8 @@ createBookPreviews(
     getElement("[data-list-items]")
 );
 updateShowMoreButton();
+//Storing the theme in the local storage
+const initialTheme = getStoredTheme();
+applyTheme(initialTheme);
+localStorage.setItem("theme", initialTheme);
+
