@@ -140,6 +140,30 @@ const closeOverlay = (selector) => {
     updateShowMoreButton();
   });
 
+  getElement("[data-list-items]").addEventListener("click", (event) => {
+    const pathArray = Array.from(event.composedPath());
+    const active = pathArray.find((node) => node?.dataset?.preview);
+    if (active) {
+      const book = books.find((book) => book.id === active.dataset.preview);
+      if (book) {
+        getElement("[data-list-active]").open = true;
+        getElement("[data-list-blur]").src = book.image;
+        getElement("[data-list-image]").src = book.image;
+        getElement("[data-list-title]").innerText = book.title;
+        getElement("[data-list-subtitle]").innerText = `${
+          authors[book.author]
+        } (${new Date(book.published).getFullYear()})`;
+        getElement("[data-list-description]").innerText = book.description;
+      }
+    }
+  });
+    /*createBookPreviews(
+      matches.slice(page * BOOKS_PER_PAGE, (page + 1) * BOOKS_PER_PAGE),
+      getElement("[data-list-items]")
+    );
+    page += 1;
+    updateShowMoreButton();*/
+
 // Initial setup
 createOptions(genres, "All Genres", getElement("[data-search-genres]"));
 createOptions(authors, "All Authors", getElement("[data-search-authors]"));
