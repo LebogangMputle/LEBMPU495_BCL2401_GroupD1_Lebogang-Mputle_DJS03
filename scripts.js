@@ -1,12 +1,41 @@
 // Import book data
 import { books, authors, genres, BOOKS_PER_PAGE } from "./data.js";
 
-// State variables
-let page = 1;
-let matches = books; // Initially show all books
+// Book class
+class Book {
+  constructor({ id, title, author, genres, image, description, published }) {
+    this.id = id;
+    this.title = title;
+    this.author = author;
+    this.genres = genres;
+    this.image = image;
+    this.description = description;
+    this.published = published;
+  }
+}
 
-// DOM manipulation functions
-const getElement = (selector) => document.querySelector(selector);
+// Library class
+class Library {
+  constructor(books, authors, genres) {
+    this.books = books.map(book => new Book(book));
+    this.authors = authors;
+    this.genres = genres;
+    this.matches = this.books;
+    this.page = 1;
+  }
+
+  filterBooks(filters) {
+    return this.books.filter(book => {
+      const titleMatch = filters.title.trim() === "" || book.title.toLowerCase().includes(filters.title.toLowerCase());
+      const authorMatch = filters.author === "any" || book.author === filters.author;
+      const genreMatch = filters.genre === "any" || book.genres.includes(filters.genre);
+      return titleMatch && authorMatch && genreMatch;
+    });
+  }
+}
+
+// DOM Manipulation functions
+const getElement = selector => document.querySelector(selector);
 
 const createBookPreviews = (books, container) => {
   const fragment = document.createDocumentFragment();
@@ -18,7 +47,7 @@ const createBookPreviews = (books, container) => {
       <img class="preview__image" src="${image}" />
       <div class="preview__info">
         <h3 class="preview__title">${title}</h3>
-        <div class="preview__author">${authors[author]}</div>
+        <div class="preview__author">${library.authors[author]}</div>
       </div>
     `;
     fragment.appendChild(element);
@@ -41,23 +70,23 @@ const createOptions = (options, defaultOption, container) => {
   container.appendChild(fragment);
 };
 
-// Theme functionality
-const applyTheme = (theme) => {
+// Theme Manager
+class ThemeManager {
+  static applyTheme(theme) {
     const isNight = theme === "night";
-    document.documentElement.style.setProperty(
-      "--color-dark",
-      isNight ? "255, 255, 255" : "10, 10, 20"
-    );
-    document.documentElement.style.setProperty(
-      "--color-light",
-      isNight ? "10, 10, 20" : "255, 255, 255"
-    );
-  };
-  
+    document.documentElement.style.setProperty("--color-dark", isNight ? "255, 255, 255" : "10, 10, 20");
+    document.documentElement.style.setProperty("--color-light", isNight ? "10, 10, 20" : "255, 255, 255");
+    localStorage.setItem("theme", theme);
+  }
+
+  static getStoredTheme() {
+    return localStorage.getItem("theme") || "day";
+  }
+}
 
 // "Show more" button logic
 const updateShowMoreButton = () => {
-  const remainingBooks = matches.length - page * BOOKS_PER_PAGE;
+  const remainingBooks = library.matches.length - library.page * BOOKS_PER_PAGE;
   const button = getElement("[data-list-button]");
   button.innerText = `Show more (${remainingBooks})`;
   button.disabled = remainingBooks <= 0;
@@ -67,126 +96,71 @@ const updateShowMoreButton = () => {
   `;
 };
 
+// Initialize Library
+const library = new Library(books, authors, genres);
+
 // Event listener functions
-const closeOverlay = (selector) => {
-    getElement(selector).open = false;
-  };
-  
-  const openOverlay = (selector, focusSelector = null) => {
-    getElement(selector).open = true;
-    if (focusSelector) getElement(focusSelector).focus();
-  };
-  
-  const applySearchFilters = (filters) => {
-    return books.filter((book) => {
-      const titleMatch =
-        filters.title.trim() === "" ||
-        book.title.toLowerCase().includes(filters.title.toLowerCase());
-      const authorMatch = filters.author === "any" || book.author === filters.author;
-      const genreMatch = filters.genre === "any" || book.genres.includes(filters.genre);
-      return titleMatch && authorMatch && genreMatch;
-    });
-  };
-
-  //check for a stored theme preference in local storage
-  const getStoredTheme = () => {
-    return localStorage.getItem("theme") || "day"; // Default to "day" if not found
-  };
-  
-  
-  getElement("[data-search-cancel]").addEventListener("click", () =>
-    closeOverlay("[data-search-overlay]")
-  );
-  getElement("[data-settings-cancel]").addEventListener("click", () =>
-    closeOverlay("[data-settings-overlay]")
-  );
-  getElement("[data-header-search]").addEventListener("click", () =>
-    openOverlay("[data-search-overlay]", "[data-search-title]")
-  );
-  getElement("[data-header-settings]").addEventListener("click", () =>
-    openOverlay("[data-settings-overlay]")
-  );
-  getElement("[data-list-close]").addEventListener("click", () =>
-    closeOverlay("[data-list-active]")
-  );
-
-  //theme setting submission handler
-  getElement("[data-settings-form]").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const { theme } = Object.fromEntries(formData);
-    applyTheme(theme);
-    localStorage.setItem("theme", theme);
-    closeOverlay("[data-settings-overlay]");
-  });
-  
-  
-  getElement("[data-search-form]").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const filters = Object.fromEntries(formData);
-    matches = applySearchFilters(filters);
-    page = 1;
-    getElement("[data-list-message]").classList.toggle(
-      "list__message_show",
-      matches.length < 1
-    );
-    getElement("[data-list-items]").innerHTML = "";
-    createBookPreviews(
-      matches.slice(0, BOOKS_PER_PAGE),
-      getElement("[data-list-items]")
-    );
-    updateShowMoreButton();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    closeOverlay("[data-search-overlay]");
-  });
-  
-  getElement("[data-list-button]").addEventListener("click", () => {
-    createBookPreviews(
-      matches.slice(page * BOOKS_PER_PAGE, (page + 1) * BOOKS_PER_PAGE),
-      getElement("[data-list-items]")
-    );
-    page += 1;
-    updateShowMoreButton();
-  });
-
-  getElement("[data-list-items]").addEventListener("click", (event) => {
-    const pathArray = Array.from(event.composedPath());
-    const active = pathArray.find((node) => node?.dataset?.preview);
-    if (active) {
-      const book = books.find((book) => book.id === active.dataset.preview);
-      if (book) {
-        getElement("[data-list-active]").open = true;
-        getElement("[data-list-blur]").src = book.image;
-        getElement("[data-list-image]").src = book.image;
-        getElement("[data-list-title]").innerText = book.title;
-        getElement("[data-list-subtitle]").innerText = `${
-          authors[book.author]
-        } (${new Date(book.published).getFullYear()})`;
-        getElement("[data-list-description]").innerText = book.description;
-      }
-    }
-  });
-    /*createBookPreviews(
-      matches.slice(page * BOOKS_PER_PAGE, (page + 1) * BOOKS_PER_PAGE),
-      getElement("[data-list-items]")
-    );
-    page += 1;
-    updateShowMoreButton();*/
+const closeOverlay = selector => getElement(selector).open = false;
+const openOverlay = (selector, focusSelector = null) => {
+  getElement(selector).open = true;
+  if (focusSelector) getElement(focusSelector).focus();
+};
 
 // Initial setup
 createOptions(genres, "All Genres", getElement("[data-search-genres]"));
 createOptions(authors, "All Authors", getElement("[data-search-authors]"));
-applyTheme(
-  window.matchMedia("(prefers-color-scheme: dark)").matches ? "night" : "day"
-); // Apply initial theme
-createBookPreviews(
-    matches.slice(0, BOOKS_PER_PAGE), 
-    getElement("[data-list-items]")
-);
+const initialTheme = ThemeManager.getStoredTheme();
+ThemeManager.applyTheme(initialTheme);
+createBookPreviews(library.matches.slice(0, BOOKS_PER_PAGE), getElement("[data-list-items]"));
 updateShowMoreButton();
-//Stored the theme in the local storage
-const initialTheme = getStoredTheme();
-applyTheme(initialTheme);
-localStorage.setItem("theme", initialTheme);
 
+// Event Listeners
+getElement("[data-search-cancel]").addEventListener("click", () => closeOverlay("[data-search-overlay]"));
+getElement("[data-settings-cancel]").addEventListener("click", () => closeOverlay("[data-settings-overlay]"));
+getElement("[data-header-search]").addEventListener("click", () => openOverlay("[data-search-overlay]", "[data-search-title]"));
+getElement("[data-header-settings]").addEventListener("click", () => openOverlay("[data-settings-overlay]"));
+getElement("[data-list-close]").addEventListener("click", () => closeOverlay("[data-list-active]"));
+
+getElement("[data-settings-form]").addEventListener("submit", event => {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+  const { theme } = Object.fromEntries(formData);
+  ThemeManager.applyTheme(theme);
+  closeOverlay("[data-settings-overlay]");
+});
+
+getElement("[data-search-form]").addEventListener("submit", event => {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+  const filters = Object.fromEntries(formData);
+  library.matches = library.filterBooks(filters);
+  library.page = 1;
+  getElement("[data-list-message]").classList.toggle("list__message_show", library.matches.length < 1);
+  getElement("[data-list-items]").innerHTML = "";
+  createBookPreviews(library.matches.slice(0, BOOKS_PER_PAGE), getElement("[data-list-items]"));
+  updateShowMoreButton();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  closeOverlay("[data-search-overlay]");
+});
+
+getElement("[data-list-button]").addEventListener("click", () => {
+  createBookPreviews(library.matches.slice(library.page * BOOKS_PER_PAGE, (library.page + 1) * BOOKS_PER_PAGE), getElement("[data-list-items]"));
+  library.page += 1;
+  updateShowMoreButton();
+});
+
+getElement("[data-list-items]").addEventListener("click", event => {
+  const pathArray = Array.from(event.composedPath());
+  const active = pathArray.find(node => node?.dataset?.preview);
+  if (active) {
+    const book = library.books.find(book => book.id === active.dataset.preview);
+    if (book) {
+      getElement("[data-list-active]").open = true;
+      getElement("[data-list-blur]").src = book.image;
+      getElement("[data-list-image]").src = book.image;
+      getElement("[data-list-title]").innerText = book.title;
+      getElement("[data-list-subtitle]").innerText = `${library.authors[book.author]} (${new Date(book.published).getFullYear()})`;
+      getElement("[data-list-description]").innerText = book.description;
+    }
+  }
+});
